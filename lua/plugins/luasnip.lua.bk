@@ -1,0 +1,21 @@
+-- ~/.config/nvim/lua/plugins/luasnip.lua
+-- 这是清理后的版本，keymaps (快捷键) 已被移至 nvim-cmp (在 codeium.lua 中) 统一管理
+
+return {
+  "L3MON4D3/luasnip",
+
+  dependencies = { "rafamadriz/friendly-snippets" },
+
+  -- 这是来自 luasnip.lua 的 config
+  config = function()
+    require("luasnip.loaders.from_vscode").lazy_load()
+    require("luasnip.loaders.from_vscode").lazy_load({
+      paths = { vim.fn.stdpath("config") .. "/snippets" },
+    })
+  end,
+
+  --
+  -- 'keys' 部分已被移除，因为它现在由 nvim-cmp 统一处理
+  -- (请查看 codeium.lua 文件)
+  --
+}
