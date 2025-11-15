@@ -1,29 +1,51 @@
 {
-  "SQLModel Model Definition": {
+  "SQLModel Model Definition (Modern)": {
     "prefix": "sqlm-model",
     "body": [
-      "from typing import Optional",
       "from sqlmodel import Field, SQLModel",
       "",
       "class ${1:Item}(SQLModel, table=True):",
-      "    id: Optional[int] = Field(default=None, primary_key=True)",
+      "    id: int | None = Field(default=None, primary_key=True)",
       "    name: str = Field(index=True)",
-      "    ${2:description}: Optional[str] = Field(default=None)"
+      "    ${2:description}: str | None = Field(default=None)",
+      "    ",
+      "    ${0} # 光标最后停留在这里，让您继续添加字段"
     ],
-    "description": "SQLModel Model Definition (sqlm-model)"
+    "description": "SQLModel Model Definition (Modern Union |) (sqlm-model)"
   },
-  "SQLModel Async Session Dependency": {
-    "prefix": "sqlm-session",
+  "SQLModel Base (Modern)": {
+    "prefix": "sqlm-base",
     "body": [
-      "from typing import AsyncGenerator",
-      "from sqlmodel.ext.asyncio.session import AsyncSession",
-      "from ${1:your_db_module} import ${2:engine}",
+      "from sqlmodel import Field, SQLModel",
       "",
-      "async def get_session() -> AsyncGenerator[AsyncSession, None]:",
-      "    async with AsyncSession(${2:engine}) as session:",
-      "        yield session"
+      "class ${1:Item}Base(SQLModel):",
+      "    name: str = Field(index=True)",
+      "    ${2:description}: str | None = Field(default=None)",
+      "    ${0}"
     ],
-    "description": "SQLModel Async Session Dependency for FastAPI (sqlm-session)"
+    "description": "SQLModel Base Schema (Modern Union |) (sqlm-base)"
+  },
+  "SQLModel Create (Modern)": {
+    "prefix": "sqlm-create-schema",
+    "body": [
+      "class ${1:Item}Create(${1:Item}Base):",
+      "    pass # 继承所有 Base 字段",
+      "    ${0}"
+    ],
+    "description": "SQLModel Create Schema (sqlm-create-schema)"
+  },
+  "SQLModel Update (Modern)": {
+    "prefix": "sqlm-update-schema",
+    "body": [
+      "from sqlmodel import SQLModel",
+      "",
+      "class ${1:Item}Update(SQLModel):",
+      "    # 所有字段都是 | None，用于 PATCH 更新",
+      "    name: str | None = None",
+      "    ${2:description}: str | None = None",
+      "    ${0}"
+    ],
+    "description": "SQLModel Update Schema (Modern Union |) (sqlm-update-schema)"
   },
   "CRUD Async Create (Strict)": {
     "prefix": "crud-create",
@@ -59,6 +81,7 @@
     "prefix": "crud-update",
     "body": [
       "async def update_${1:item}(db: AsyncSession, ${1:item}_id: int, payload: ${2:ItemUpdate}):",
+      "    # This snippet assumes you have a get_${1:item} function",
       "    ${1:item} = await get_${1:item}(db, ${1:item}_id)",
       "    if ${1:item} is None:",
       "        raise ValueError(\"${1:Item} not found\")",
@@ -78,6 +101,7 @@
     "prefix": "crud-delete",
     "body": [
       "async def delete_${1:item}(db: AsyncSession, ${1:item}_id: int):",
+      "    # This snippet assumes you have a get_${1:item} function",
       "    ${1:item} = await get_${1:item}(db, ${1:item}_id)",
       "    if ${1:item} is None:",
       "        raise ValueError(\"${1:Item} not found\")",
@@ -86,5 +110,154 @@
       "    await db.commit()"
     ],
     "description": "CRUD Async Delete (Uses get_item for DRY) (crud-delete)"
+  },
+  "API Router Setup (Production)": {
+    "prefix": "api-setup",
+    "body": [
+      "\"\"\"${1:Demo} 路由模块\"\"\"",
+      "from __future__ import annotations",
+      "",
+      "from fastapi import APIRouter, Depends, HTTPException, status, Query, Path",
+      "from sqlalchemy.ext.asyncio import AsyncSession",
+      "from typing import List",
+      "",
+      "from ..core.${2:database_async} import ${3:get_db}",
+      "from ..features.${4:demo}.schemas import (",
+      "    ${5:DemoItem}Create,",
+      "    ${5:DemoItem}Update,",
+      "    ${5:DemoItem}Read,",
+      ")",
+      "from ..features.${4:demo} import ${6:crud_async} as crud",
+      "from ..features.${4:demo}.dependencies import ${7:require_permission}",
+      "",
+      "# ==================== Router 初始化 ====================",
+      "router = APIRouter(",
+      "    prefix=\"/${4:demo}\",",
+      "    tags=[\"${8:Demo}\"],",
+      ")",
+      ""
+    ],
+    "description": "FastAPI Router boilerplate (Your Prod Style) (api-setup)"
+  },
+  "API LIST (Production)": {
+    "prefix": "api-list",
+    "body": [
+      "# ==================== 查询列表 ====================",
+      "@router.get(",
+      "    \"/items\",",
+      "    response_model=list[${1:DemoItemRead}],",
+      "    summary=\"查询${2:物品}列表\"",
+      ")",
+      "async def list_${3:items}(",
+      "    skip: int = Query(0, ge=0, description=\"跳过记录数\"),",
+      "    limit: int = Query(100, ge=1, le=1000, description=\"返回记录数\"),",
+      "    db: AsyncSession = Depends(${4:get_db}),",
+      "    _: None = Depends(${5:require_permission}(\"${6:demo}:read\")),",
+      "):",
+      "    \"\"\"查询${2:物品}列表\"\"\"",
+      "    return await crud.get_${3:items}(db, skip=skip, limit=limit)"
+    ],
+    "description": "FastAPI GET route (List) (Your Prod Style) (api-list)"
+  },
+  "API GET (Production)": {
+    "prefix": "api-get",
+    "body": [
+      "# ==================== 查询详情 ====================",
+      "@router.get(",
+      "    \"/items/{${1:item}_id}\",",
+      "    response_model=${2:DemoItemRead},",
+      "    summary=\"查询${3:物品}详情\",",
+      "    responses={404: {\"description\": \"${3:物品}不存在\"}}",
+      ")",
+      "async def get_${1:item}(",
+      "    ${1:item}_id: int = Path(..., gt=0, description=\"${3:物品}ID\"),",
+      "    db: AsyncSession = Depends(${4:get_db}),",
+      "    _: None = Depends(${5:require_permission}(\"${6:demo}:read\")),",
+      "):",
+      "    \"\"\"查询${3:物品}详情\"\"\"",
+      "    item = await crud.get_${1:item}(db, ${1:item}_id)",
+      "    if item is None:",
+      "        raise HTTPException(",
+      "            status_code=status.HTTP_404_NOT_FOUND,",
+      "            detail=\"${3:物品}不存在\"",
+      "        )",
+      "    return item"
+    ],
+    "description": "FastAPI GET route (Get One) (Your Prod Style) (api-get)"
+  },
+  "API POST (Production)": {
+    "prefix": "api-post",
+    "body": [
+      "# ==================== 创建资源 ====================",
+      "@router.post(",
+      "    \"/items\",",
+      "    response_model=${1:DemoItemRead},",
+      "    status_code=status.HTTP_201_CREATED,",
+      "    summary=\"创建${2:物品}\"",
+      ")",
+      "async def create_${3:item}(",
+      "    payload: ${4:DemoItemCreate},",
+      "    db: AsyncSession = Depends(${5:get_db}),",
+      "    _: None = Depends(${6:require_permission}(\"${7:demo}:write\")),",
+      "):",
+      "    \"\"\"创建新${2:物品}\"\"\"",
+      "    return await crud.create_${3:item}(db, payload)"
+    ],
+    "description": "FastAPI POST route (Create) (Your Prod Style) (api-post)"
+  },
+  "API PATCH (Production)": {
+    "prefix": "api-patch",
+    "body": [
+      "# ==================== 更新资源 ====================",
+      "@router.patch(",
+      "    \"/items/{${1:item}_id}\",",
+      "    response_model=${2:DemoItemRead},",
+      "    summary=\"更新${3:物品}\",",
+      "    responses={404: {\"description\": \"${3:物品}不存在\"}}",
+      ")",
+      "async def update_${1:item}(",
+      "    ${1:item}_id: int = Path(..., gt=0, description=\"${3:物品}ID\"),",
+      "    payload: ${4:DemoItemUpdate},",
+      "    db: AsyncSession = Depends(${5:get_db}),",
+      "    _: None = Depends(${6:require_permission}(\"${7:demo}:write\")),",
+      "):",
+      "    \"\"\"更新${3:物品}信息\"\"\"",
+      "    try:",
+      "        return await crud.update_${1:item}(db, ${1:item}_id, payload)",
+      "    except ValueError as e:",
+      "        raise HTTPException(",
+      "            status_code=status.HTTP_404_NOT_FOUND,",
+      "            detail=str(e)",
+      "        )",
+      ""
+    ],
+    "description": "FastAPI PATCH route (Update) (Your Prod Style) (api-patch)"
+  },
+  "API DELETE (Production)": {
+    "prefix": "api-delete",
+    "body": [
+      "# ==================== 删除资源 ====================",
+      "@router.delete(",
+      "    \"/items/{${1:item}_id}\",",
+      "    status_code=status.HTTP_204_NO_CONTENT,",
+      "    summary=\"删除${2:物品}\",",
+      "    responses={404: {\"description\": \"${2:物品}不存在\"}}",
+      ")",
+      "async def delete_${1:item}(",
+      "    ${1:item}_id: int = Path(..., gt=0, description=\"${2:物品}ID\"),",
+      "    db: AsyncSession = Depends(${3:get_db}),",
+      "    _: None = Depends(${4:require_permission}(\"${5:demo}:write\")),",
+      "):",
+      "    \"\"\"删除${2:物品}\"\"\"",
+      "    try:",
+      "        await crud.delete_${1:item}(db, ${1:item}_id)",
+      "    except ValueError as e:",
+      "        raise HTTPException(",
+      "            status_code=status.HTTP_404_NOT_FOUND,",
+      "            detail=str(e)",
+      "        )",
+      "    return None"
+    ],
+    "description": "FastAPI DELETE route (Delete) (Your Prod Style) (api-delete)"
   }
 }
