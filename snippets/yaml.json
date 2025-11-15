@@ -2,7 +2,6 @@
   "Docker Compose Minimal": {
     "prefix": "dcmin",
     "body": [
-      "version: '3.8'",
       "services:",
       "  ${1:app}:",
       "    image: ${2:your-image}",
@@ -10,11 +9,9 @@
     ],
     "description": "Minimal Docker Compose (dcmin)"
   },
-  "Docker Compose Medium (Revised)": {
+  "Docker Compose Medium": {
     "prefix": "dcmed",
     "body": [
-      "version: '3.8'",
-      "",
       "services:",
       "  ${1:app}:",
       "    image: ${2:your-image}",
@@ -24,8 +21,6 @@
       "    ports:",
       "      - \"${5:8080}:${6:80}\"",
       "    volumes:",
-      "      # 绑定挂载: [本地路径]:[容器内路径] (用于开发时同步代码)",
-      "      - \"${7:./}:${8:/app}\"",
       "      # 命名卷: [卷名]:[容器内路径] (用于持久化数据)",
       "      - \"${9:data-volume}:${10:/data}\"",
       "",
@@ -34,93 +29,5 @@
       "  ${9:data-volume}:"
     ],
     "description": "Medium Docker Compose with image, env, ports, and volumes (dcmed)"
-  }
-  "SQLModel Model Definition": {
-    "prefix": "sqlm-model",
-    "body": [
-      "from typing import Optional",
-      "from sqlmodel import Field, SQLModel",
-      "",
-      "class ${1:Item}(SQLModel, table=True):",
-      "    id: Optional[int] = Field(default=None, primary_key=True)",
-      "    name: str = Field(index=True)",
-      "    ${2:description}: Optional[str] = Field(default=None)"
-    ],
-    "description": "SQLModel Model Definition (sqlm-model)"
-  },
-  "SQLModel Async Session Dependency": {
-    "prefix": "sqlm-session",
-    "body": [
-      "from typing import AsyncGenerator",
-      "from sqlmodel.ext.asyncio.session import AsyncSession",
-      "from ${1:your_db_module} import ${2:engine}",
-      "",
-      "async def get_session() -> AsyncGenerator[AsyncSession, None]:",
-      "    async with AsyncSession(${2:engine}) as session:",
-      "        yield session"
-    ],
-    "description": "SQLModel Async Session Dependency for FastAPI (sqlm-session)"
-  },
-  "CRUD Async Create (Core)": {
-    "prefix": "crud-create",
-    "body": [
-      "async def create_${1:item}(db: AsyncSession, payload: ${2:ItemCreate}) -> ${3:Item}:",
-      "    db_${1:item} = ${3:Item}.model_validate(payload)",
-      "    db.add(db_${1:item})",
-      "    await db.commit()",
-      "    await db.refresh(db_${1:item})",
-      "    return db_${1:item}"
-    ],
-    "description": "CRUD Async Create Function (Core) (crud-create)"
-  },
-  "CRUD Async Get (Core)": {
-    "prefix": "crud-get",
-    "body": [
-      "async def get_${1:item}(db: AsyncSession, ${1:item}_id: int) -> ${2:Item} | None:",
-      "    return await db.get(${2:Item}, ${1:item}_id)"
-    ],
-    "description": "CRUD Async Get One by ID (Core) (crud-get)"
-  },
-  "CRUD Async List (Core)": {
-    "prefix": "crud-list",
-    "body": [
-      "async def get_${1:items}(db: AsyncSession, skip: int = 0, limit: int = 100) -> Sequence[${2:Item}]:",
-      "    statement = select(${2:Item}).order_by(${2:Item}.id).offset(skip).limit(limit)",
-      "    result = await db.exec(statement)",
-      "    return result.all()"
-    ],
-    "description": "CRUD Async Get Multiple/List (Core) (crud-list)"
-  },
-  "CRUD Async Update (Core)": {
-    "prefix": "crud-update",
-    "body": [
-      "async def update_${1:item}(db: AsyncSession, ${1:item}_id: int, payload: ${2:ItemUpdate}) -> ${3:Item}:",
-      "    db_${1:item} = await db.get(${3:Item}, ${1:item}_id)",
-      "    if not db_${1:item}:",
-      "        raise ValueError(\"${1:Item} not found\")",
-      "    ",
-      "    ${1:item}_data = payload.model_dump(exclude_unset=True)",
-      "    for key, value in ${1:item}_data.items():",
-      "        setattr(db_${1:item}, key, value)",
-      "        ",
-      "    db.add(db_${1:item})",
-      "    await db.commit()",
-      "    await db.refresh(db_${1:item})",
-      "    return db_${1:item}"
-    ],
-    "description": "CRUD Async Update Function (Core) (crud-update)"
-  },
-  "CRUD Async Delete (Core)": {
-    "prefix": "crud-delete",
-    "body": [
-      "async def delete_${1:item}(db: AsyncSession, ${1:item}_id: int):",
-      "    db_${1:item} = await db.get(${2:Item}, ${1:item}_id)",
-      "    if not db_${1:item}:",
-      "        raise ValueError(\"${1:Item} not found\")",
-      "    ",
-      "    await db.delete(db_${1:item})",
-      "    await db.commit()"
-    ],
-    "description": "CRUD Async Delete Function (Core) (crud-delete)"
   }
 }
