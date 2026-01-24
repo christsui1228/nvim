@@ -45,19 +45,25 @@ ls.add_snippets("sql", {
     t(";"),
   }),
 
-  -- 排序查询
-  s("selo", {
+  -- 降序查询
+  s("seld", {
     t("SELECT * FROM "),
     i(1, "table_name"),
     t({ "", "ORDER BY " }),
     i(2, "column"),
-    t(" "),
-    c(3, {
-      t("DESC"),
-      t("ASC"),
-    }),
-    t(" LIMIT "),
-    i(4, "100"),
+    t(" DESC LIMIT "),
+    i(3, "100"),
+    t(";"),
+  }),
+
+  -- 升序查询
+  s("sela", {
+    t("SELECT * FROM "),
+    i(1, "table_name"),
+    t({ "", "ORDER BY " }),
+    i(2, "column"),
+    t(" ASC LIMIT "),
+    i(3, "100"),
     t(";"),
   }),
 

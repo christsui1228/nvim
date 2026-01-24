@@ -1,6 +1,28 @@
 return {
   {
     "L3MON4D3/LuaSnip",
+    config = function()
+      local ls = require("luasnip")
+      
+      -- 设置 choice_node 切换快捷键
+      vim.keymap.set({ "i", "s" }, "<C-l>", function()
+        if ls.choice_active() then
+          ls.change_choice(1)
+        end
+      end, { desc = "LuaSnip: Next choice" })
+      
+      vim.keymap.set({ "i", "s" }, "<C-h>", function()
+        if ls.choice_active() then
+          ls.change_choice(-1)
+        end
+      end, { desc = "LuaSnip: Previous choice" })
+      
+      -- 添加重新加载 snippets 的命令
+      vim.api.nvim_create_user_command("LuaSnipReload", function()
+        require("luasnip.loaders.from_lua").load({ paths = vim.fn.stdpath("config") .. "/snippets" })
+        print("Snippets reloaded!")
+      end, {})
+    end,
     opts = function(_, opts)
       -- 【核心】开启实时更新：确保你的 pmodel/tablename 会随打字实时转换
       opts.update_events = "TextChanged,TextChangedI"
