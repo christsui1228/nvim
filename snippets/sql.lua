@@ -3,6 +3,7 @@ local s = ls.snippet
 local t = ls.text_node
 local i = ls.insert_node
 local f = ls.function_node
+local c = ls.choice_node
 
 -- 辅助函数：获取当前日期 (2026-01-23) [cite: 2026-01-23]
 local function get_date()
@@ -37,6 +38,29 @@ ls.add_snippets("sql", {
     t(";"),
   }),
 
+  -- 统计数量
+  s("cnt", {
+    t("SELECT COUNT(*) FROM "),
+    i(1, "table_name"),
+    t(";"),
+  }),
+
+  -- 排序查询
+  s("selo", {
+    t("SELECT * FROM "),
+    i(1, "table_name"),
+    t({ "", "ORDER BY " }),
+    i(2, "column"),
+    t(" "),
+    c(3, {
+      t("DESC"),
+      t("ASC"),
+    }),
+    t(" LIMIT "),
+    i(4, "100"),
+    t(";"),
+  }),
+
   -- 更新数据 (upd)
   s("upd", {
     t("UPDATE "),
@@ -48,6 +72,13 @@ ls.add_snippets("sql", {
     t({ "", "WHERE " }),
     i(4, "condition"),
     t(";"),
+  }),
+
+  -- 清空表
+  s("trunc", {
+    t("TRUNCATE TABLE "),
+    i(1, "table_name"),
+    t(" CASCADE;"),
   }),
 
   -- ==========================================
