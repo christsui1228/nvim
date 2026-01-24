@@ -18,6 +18,14 @@ return {
     snippets = { preset = "luasnip" },
     sources = {
       default = { "lsp", "path", "snippets", "buffer" },
+      providers = {
+        snippets = {
+          score_offset = 10, -- 提升 snippets 优先级
+        },
+        buffer = {
+          score_offset = -3, -- 降低 buffer 优先级
+        },
+      },
     },
   },
 }
