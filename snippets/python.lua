@@ -26,6 +26,24 @@ local function to_title_case(args)
 end
 
 ls.add_snippets("python", {
+  -- Piccolo imports 模板
+  s("pimp", {
+    t({
+      "from piccolo.columns import (",
+      "    ForeignKey,",
+      "    Integer,",
+      "    JSONB,",
+      "    Numeric,",
+      "    Text,",
+      "    Varchar,",
+      ")",
+      "from .base import TimestampTable",
+      "",
+      ""
+    }),
+    i(0),
+  }),
+
   -- Piccolo Model 模板
   s("pmodel", {
     t("class "),
