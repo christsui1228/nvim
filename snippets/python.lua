@@ -39,7 +39,7 @@ ls.add_snippets("python", {
       ")",
       "from .base import TimestampTable",
       "",
-      ""
+      "",
     }),
     i(0),
   }),
