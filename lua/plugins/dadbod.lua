@@ -32,6 +32,7 @@ return {
 
         if is_db_tab then
           -- 如果已经在数据库 Tab，切回上一个 Tab (回代码)
+          vim.cmd("silent! pclose")
           vim.cmd("tabprevious")
         else
           -- 查找是否已经有打开的 DBUI Tab
@@ -55,6 +56,7 @@ return {
           if not found_existing_tab then
             vim.cmd("tabnew")
             vim.cmd("DBUI")
+            vim.cmd("only")
           end
         end
       end
@@ -73,9 +75,9 @@ return {
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "dbui",
         callback = function()
-          -- 核心修改：这里不再调用内部函数，而是直接映射到 'o' 键
-          -- remap = true 表示让这个映射去触发 dbui 插件原本对 'o' 的定义
           vim.keymap.set("n", "<Leader>o", "o", { buffer = true, remap = true, desc = "DB: Open Data" })
+          vim.keymap.set("n", "<Leader>v", "V", { buffer = true, remap = true, desc = "DB: Open in Vsplit" })
+          vim.keymap.set("n", "<Leader>s", "S", { buffer = true, remap = true, desc = "DB: Open in Split" })
         end,
       })
     end,
