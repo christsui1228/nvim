@@ -48,12 +48,12 @@ ls.add_snippets("python", {
   s("pmodel", {
     t("class "),
     i(1, "ClassName"),
-    t("(Table):"),
+    t("(Table, tablename=\""),
+    f(to_snake_case, { 1 }), -- 实时监听节点 1 (ClassName)
+    t("\"):"),
     t({ "", "    id = Serial(primary_key=True)", "    " }),
     i(2, "# TODO: Add fields"),
-    t({ "", "", "    class Meta:", '        tablename = "' }),
-    f(to_snake_case, { 1 }), -- 实时监听节点 1 (ClassName)
-    t({ '"', "" }),
+    t({ "", "" }),
     i(0),
   }),
 
