@@ -80,6 +80,16 @@ return {
           vim.keymap.set("n", "<Leader>s", "S", { buffer = true, remap = true, desc = "DB: Open in Split" })
         end,
       })
+
+      -- =========================================================
+      --  结果窗口（dbout）默认高度 20 行
+      -- =========================================================
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "dbout",
+        callback = function()
+          vim.cmd("resize 35")
+        end,
+      })
     end,
   },
 }
