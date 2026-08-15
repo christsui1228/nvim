@@ -11,5 +11,8 @@ return {
         },
       },
     },
+    keys = {
+      { "<leader>oo", "<cmd>Obsidian toggle_checkbox<CR>", desc = "Obsidian toggle checkbox" },
+    },
   },
 }
